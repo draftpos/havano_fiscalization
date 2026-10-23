@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit Partner Form View to add ZIMRA Fiscalization Fields -->
+        <record id="view_partner_form_fiscalization" model="ir.ui.view">
+            <field name="name">res.partner.form.fiscalization</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority" eval="20"/>
+            <field name="arch" type="xml">
+                <!-- Place ZIMRA VAT Registered toggle and conditional Trade Name / TIN / VAT fields right below Tax ID -->
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="is_vat_registered" string="Is VAT Registered?"/>
+                    <field name="trade_name" string="Trade Name (Trading As)" placeholder="e.g. Acme Stores" invisible="not is_vat_registered"/>
+                    <field name="fiscal_tin" string="ZIMRA TIN" placeholder="e.g. 2000000000 (10 digits)" invisible="not is_vat_registered"/>
+                    <field name="fiscal_vat" string="ZIMRA VAT Number" placeholder="e.g. 100000000 (9 digits)" invisible="not is_vat_registered"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

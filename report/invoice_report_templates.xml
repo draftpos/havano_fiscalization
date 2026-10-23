@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit standard Odoo invoice report to inject ZIMRA Fiscal Details -->
+        <template id="report_invoice_document_fiscalization" inherit_id="account.report_invoice_document">
+
+            <!-- Replace invoice title with Fiscal Tax Invoice / Fiscal Credit Note when fiscalized -->
+            <xpath expr="//t[@name='invoice_title']" position="replace">
+                <t t-if="o.company_id.fiscal_enabled and o.fiscal_status == 'fiscalized'">
+                    <span>Fiscal Tax Invoice</span>
+                </t>
+                <t t-else="">
+                    <span>Invoice</span>
+                </t>
+            </xpath>
+
+            <xpath expr="//t[@name='credit_note_title']" position="replace">
+                <t t-if="o.company_id.fiscal_enabled and o.fiscal_status == 'fiscalized'">
+                    <span>Fiscal Credit Note</span>
+                </t>
+                <t t-else="">
+                    <span>Credit Note</span>
+                </t>
+            </xpath>
+
+            <!-- Inject ZIMRA Fiscal Verification block into the invoice body -->
+            <xpath expr="//div[hasclass('invoice_main')]//div[hasclass('page')]" position="inside">
+                <t t-if="o.company_id.fiscal_enabled and o.fiscal_status == 'fiscalized'">
+                    <div class="mt-4 pt-3 pb-3 px-3 border border-2 border-dark rounded bg-light avoid-page-break-inside"
+                         style="border-color: #0d233a !important; background-color: #f8fafc !important;">
+                        <div class="row align-items-center">
+                            <!-- Left: ZIMRA QR Code -->
+                            <div class="col-4 text-center">
+                                <t t-if="o.fiscal_qr_code">
+                                    <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=' + (o.fiscal_qr_code or '') + '&amp;width=130&amp;height=130'"
+                                         style="width: 120px; height: 120px; display: inline-block;"
+                                         alt="ZIMRA QR Code"/>
+                                </t>
+                                <div class="small fw-bold text-muted mt-1" style="font-size: 10px;">
+                                    SCAN TO VERIFY
+                                </div>
+                            </div>
+
+                            <!-- Right: Fiscal Verification Attributes -->
+                            <div class="col-8" style="font-size: 12px; line-height: 1.5;">
+                                <div class="fw-bold text-uppercase pb-1 mb-2 border-bottom border-dark"
+                                     style="color: #0d233a; font-size: 13px; letter-spacing: 0.5px;">
+                                    ZIMRA ELECTRONIC FISCAL VERIFICATION
+                                </div>
+                                <table class="table table-sm table-borderless mb-0" style="font-size: 11px;">
+                                    <tr t-if="o.fiscal_global_no">
+                                        <td class="fw-bold p-0 text-muted" style="width: 140px;">Global Invoice No:</td>
+                                        <td class="p-0 fw-bold"><span t-field="o.fiscal_global_no"/></td>
+                                    </tr>
+                                    <tr t-if="o.fiscal_verification_code">
+                                        <td class="fw-bold p-0 text-muted">Verification Code:</td>
+                                        <td class="p-0 fw-bold"><span t-field="o.fiscal_verification_code"/></td>
+                                    </tr>
+                                    <tr t-if="o.fiscal_device_serial or o.fiscal_device_id">
+                                        <td class="fw-bold p-0 text-muted">EFD Device SN / ID:</td>
+                                        <td class="p-0">
+                                            <span t-field="o.fiscal_device_serial"/>
+                                            <t t-if="o.fiscal_device_id"> (<span t-field="o.fiscal_device_id"/>)</t>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.fiscal_day_no">
+                                        <td class="fw-bold p-0 text-muted">Fiscal Day:</td>
+                                        <td class="p-0"><span t-field="o.fiscal_day_no"/></td>
+                                    </tr>
+                                    <tr t-if="o.company_id.fiscal_trade_name">
+                                        <td class="fw-bold p-0 text-muted">Trading As:</td>
+                                        <td class="p-0 fw-bold"><span t-field="o.company_id.fiscal_trade_name"/></td>
+                                    </tr>
+                                    <tr t-if="o.partner_id.trade_name">
+                                        <td class="fw-bold p-0 text-muted">Buyer Trade Name:</td>
+                                        <td class="p-0"><span t-field="o.partner_id.trade_name"/></td>
+                                    </tr>
+                                    <tr t-if="o.partner_id.fiscal_tin">
+                                        <td class="fw-bold p-0 text-muted">Buyer TIN:</td>
+                                        <td class="p-0"><span t-field="o.partner_id.fiscal_tin"/></td>
+                                    </tr>
+                                    <tr t-if="o.partner_id.fiscal_vat">
+                                        <td class="fw-bold p-0 text-muted">Buyer VAT No:</td>
+                                        <td class="p-0"><span t-field="o.partner_id.fiscal_vat"/></td>
+                                    </tr>
+                                    <!-- Credit Note specifics -->
+                                    <tr t-if="o.move_type == 'out_refund' and o.reversed_entry_id">
+                                        <td class="fw-bold p-0 text-danger">Original Invoice:</td>
+                                        <td class="p-0 text-danger">
+                                            <span t-field="o.reversed_entry_id.name"/>
+                                            <t t-if="o.reversed_entry_id.fiscal_global_no">
+                                                (ZIMRA No: <span t-field="o.reversed_entry_id.fiscal_global_no"/>)
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.fiscal_qr_code">
+                                        <td class="fw-bold p-0 text-muted">Portal Link:</td>
+                                        <td class="p-0 text-break" style="font-size: 10px;">
+                                            <span t-field="o.fiscal_qr_code"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </xpath>
+
+        </template>
+
+    </data>
+</odoo>

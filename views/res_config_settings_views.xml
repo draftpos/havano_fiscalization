@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="res_config_settings_view_form_fiscalization" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.fiscalization</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="50"/>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//app[@name='account']" position="inside">
+                    <block title="ZIMRA Fiscalization" name="zimra_fiscalization_block">
+                        <setting string="ZIMRA Fiscalization" help="Automate ZIMRA Fiscalization for Customer Invoices &amp; Credit Notes via Axis Virtual Device or Havano ZIMRA Cloud">
+                            <field name="fiscal_enabled" widget="boolean_toggle"/>
+                            <div class="content-group" invisible="not fiscal_enabled">
+                                <div class="row mt16">
+                                    <label string="Fiscal Provider" for="fiscal_provider" class="col-lg-4 o_light_label fw-bold"/>
+                                    <field name="fiscal_provider" class="col-lg-8"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label string="Fiscal Trade Name (Trading As)" for="fiscal_trade_name" class="col-lg-4 o_light_label"/>
+                                    <field name="fiscal_trade_name" placeholder="e.g. My Brand / Trading Name (sent to ZIMRA instead of legal name)" class="col-lg-8"/>
+                                </div>
+                                <div class="row mt8">
+                                    <field name="fiscal_tax_inclusive" class="col-lg-1"/>
+                                    <label string="Prices are Tax Inclusive (VAT)" for="fiscal_tax_inclusive" class="col-lg-11 o_light_label"/>
+                                </div>
+
+                                <!-- Axis Virtual Device Settings -->
+                                <div class="border rounded p-3 mt-3 bg-light" invisible="fiscal_provider != 'axis'">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fa fa-server me-2"/>Axis Virtual Device Configuration
+                                    </h5>
+                                    <div class="row mt8">
+                                        <label string="Axis Server URL" for="axis_base_url" class="col-lg-4 o_light_label"/>
+                                        <field name="axis_base_url" placeholder="http://140.82.25.196:10007"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="API User Email" for="axis_email" class="col-lg-4 o_light_label"/>
+                                        <field name="axis_email" placeholder="webservice@axissol.com"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="API Password" for="axis_password" class="col-lg-4 o_light_label"/>
+                                        <field name="axis_password" password="True" placeholder="password"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="Device ID (Auto-detected)" for="axis_device_id" class="col-lg-4 o_light_label"/>
+                                        <field name="axis_device_id" readonly="1" class="fw-bold"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="EFD Serial Number (Auto-detected)" for="axis_device_sn" class="col-lg-4 o_light_label"/>
+                                        <field name="axis_device_sn" readonly="1" class="fw-bold"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <field name="axis_auto_open_day" class="col-lg-1"/>
+                                        <label string="Auto-Open Fiscal Day if Closed" for="axis_auto_open_day" class="col-lg-11 o_light_label"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <div class="col-12">
+                                            <button name="action_axis_test_connection" type="object" string="Test Connection &amp; Detect Device" class="btn btn-secondary me-2"/>
+                                            <button name="action_axis_open_fiscal_day" type="object" string="Open Fiscal Day" class="btn btn-outline-primary me-2"/>
+                                            <button name="action_axis_close_fiscal_day" type="object" string="Close Day (Z-Report)" class="btn btn-outline-danger"/>
+                                        </div>
+                                    </div>
+                                    <div class="row mt16 text-muted small" invisible="not axis_current_fiscal_day">
+                                        <div class="col-12">
+                                            Active Fiscal Day: <field name="axis_current_fiscal_day" class="fw-bold me-3"/>
+                                            Status: <field name="axis_fiscal_day_status" class="fw-bold"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Havano ZIMRA Cloud Settings -->
+                                <div class="border rounded p-3 mt-3 bg-light" invisible="fiscal_provider != 'havano_zimra'">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fa fa-cloud me-2"/>Havano ZIMRA Cloud Configuration
+                                    </h5>
+                                    <div class="row mt8">
+                                        <label string="Havano Cloud URL" for="havano_base_url" class="col-lg-4 o_light_label"/>
+                                        <field name="havano_base_url" placeholder="https://erpfiscal.havano.online"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="Device Serial Number (EFD SN)" for="havano_device_sn" class="col-lg-4 o_light_label"/>
+                                        <field name="havano_device_sn" placeholder="e.g. 10001004"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="API Key" for="havano_api_key" class="col-lg-4 o_light_label"/>
+                                        <field name="havano_api_key" placeholder="API Key"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label string="API Secret" for="havano_api_secret" class="col-lg-4 o_light_label"/>
+                                        <field name="havano_api_secret" password="True" placeholder="API Secret"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <div class="col-12">
+                                            <button name="action_havano_test_connection" type="object" string="Ping Havano Cloud Device" class="btn btn-secondary"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </setting>
+                    </block>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

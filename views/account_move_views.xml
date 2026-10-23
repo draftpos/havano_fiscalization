@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit Invoice List View to display ZIMRA Fiscal Status -->
+        <record id="view_invoice_tree_fiscalization" model="ir.ui.view">
+            <field name="name">account.invoice.list.fiscalization</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_invoice_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='status_in_payment']" position="before">
+                    <field name="fiscal_status" string="ZIMRA Status" widget="badge"
+                           decoration-success="fiscal_status == 'fiscalized'"
+                           decoration-warning="fiscal_status == 'pending'"
+                           decoration-danger="fiscal_status == 'failed'"
+                           optional="show"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Inherit Form View for Fiscalization Button and Tab -->
+        <record id="view_move_form_fiscalization" model="ir.ui.view">
+            <field name="name">account.move.form.fiscalization</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <!-- Add Fiscalize action button in header -->
+                <xpath expr="//header" position="inside">
+                    <field name="fiscal_enabled" invisible="1"/>
+                    <button name="action_fiscalize"
+                            string="ZIMRA Fiscalize"
+                            type="object"
+                            class="btn-warning"
+                            invisible="not fiscal_enabled or state != 'posted' or move_type not in ('out_invoice', 'out_refund') or fiscal_status == 'fiscalized'"/>
+                    <button name="action_fiscalize"
+                            string="Retry ZIMRA Sync"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="not fiscal_enabled or state != 'posted' or move_type not in ('out_invoice', 'out_refund') or fiscal_status != 'failed'"/>
+                </xpath>
+
+                <!-- Add ZIMRA Fiscalization Notebook Page -->
+                <xpath expr="//notebook" position="inside">
+                    <page string="ZIMRA Fiscalization" name="zimra_fiscalization_page" invisible="not fiscal_enabled or move_type not in ('out_invoice', 'out_refund')">
+                        <group>
+                            <group string="Verification Details">
+                                <field name="fiscal_status" widget="badge"
+                                       decoration-success="fiscal_status == 'fiscalized'"
+                                       decoration-warning="fiscal_status == 'pending'"
+                                       decoration-danger="fiscal_status == 'failed'"/>
+                                <field name="fiscal_global_no" readonly="1"/>
+                                <field name="fiscal_verification_code" readonly="1"/>
+                                <field name="fiscal_receipt_counter" readonly="1"/>
+                            </group>
+                            <group string="Virtual Device &amp; Day">
+                                <field name="fiscal_device_id" readonly="1"/>
+                                <field name="fiscal_device_serial" readonly="1"/>
+                                <field name="fiscal_day_no" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Buyer ZIMRA Information">
+                            <group>
+                                <field name="partner_trade_name"/>
+                                <field name="partner_fiscal_tin"/>
+                            </group>
+                            <group>
+                                <field name="partner_fiscal_vat"/>
+                            </group>
+                        </group>
+
+                        <group string="ZIMRA Verification URL / QR" invisible="not fiscal_qr_code">
+                            <field name="fiscal_qr_code" widget="url" readonly="1"/>
+                        </group>
+
+                        <group string="Fiscalization Error" invisible="not fiscal_error">
+                            <field name="fiscal_error" readonly="1" class="text-danger"/>
+                        </group>
+
+                        <notebook>
+                            <page string="Technical Payloads" groups="base.group_no_one">
+                                <group>
+                                    <field name="fiscal_request_payload" readonly="1"/>
+                                    <field name="fiscal_response_payload" readonly="1"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Search View with Fiscal Filters -->
+        <record id="view_account_invoice_filter_fiscalization" model="ir.ui.view">
+            <field name="name">account.invoice.select.fiscalization</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='due_date']" position="after">
+                    <separator/>
+                    <filter name="fiscalized" string="ZIMRA Fiscalized" domain="[('fiscal_status', '=', 'fiscalized')]"/>
+                    <filter name="fiscal_failed" string="ZIMRA Failed" domain="[('fiscal_status', '=', 'failed')]"/>
+                    <filter name="fiscal_pending" string="ZIMRA Pending Sync" domain="[('fiscal_status', '=', 'pending')]"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

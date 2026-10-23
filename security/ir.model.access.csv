@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_axis_fiscal_day_user,axis.fiscal.day.user,model_axis_fiscal_day,account.group_account_invoice,1,1,1,0
+access_axis_fiscal_day_manager,axis.fiscal.day.manager,model_axis_fiscal_day,account.group_account_manager,1,1,1,1
+access_axis_fiscal_day_base,axis.fiscal.day.base,model_axis_fiscal_day,base.group_user,1,0,0,0
